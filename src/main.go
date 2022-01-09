@@ -1,9 +1,10 @@
 package main
 
 import (
-	f "hackernewsbot/SendNews"
 	"log"
 	"os"
+
+	a "hackernewsbot/api"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/joho/godotenv"
@@ -20,9 +21,7 @@ func main() {
 		log.Panic(error)
 	}
 
-	bot.Debug = true
-
-	log.Printf("Authorized on account %s", bot.Self.UserName)
+	log.Printf("Starting %s", bot.Self.UserName)
 
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
@@ -32,9 +31,8 @@ func main() {
 	for update := range updates {
 		if update.Message != nil {
 			if update.Message.Text == "/start" {
-				msg := tgbotapi.NewMessage(update.Message.Chat.ID, "message")
-				//fetch news function goes here
-				f.SendNews()
+				msg := tgbotapi.NewMessage(update.Message.Chat.ID, "end")
+				a.FetchNews(update)
 				bot.Send(msg)
 			}
 

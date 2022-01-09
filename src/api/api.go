@@ -3,15 +3,22 @@ package api
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
+	"os"
+	"strings"
+
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"github.com/joho/godotenv"
 )
 
 var newStoriesIDs = "https://hacker-news.firebaseio.com/v0/newstories.json?print=pretty"
 var newsInfos = "https://hacker-news.firebaseio.com/v0/item/%d.json?print=pretty"
+var News []string
 var ids []int
+var relevantTopics = []string{"privacy", "hack", "linux", "golang", "hacker", "malware", "exploit", "leak", "CIA", "NSA", "hacked", "breaches", "breached", "security", "OSINT", "leaked"}
 
-//fetch the url and return the response in json format
-
+//GetLatestNewsID returns the latest news id
 func GetLatestNewsID() ([]int, error) {
 	resp, err := http.Get(newStoriesIDs)
 	if err != nil {
@@ -28,16 +35,28 @@ func GetLatestNewsID() ([]int, error) {
 	return ids, nil
 }
 
-// https://hacker-news.firebaseio.com/v0/item/29851159.json?print=pretty
-func FetchNews() {
+// FetchNews returns the news titles and urls
+func FetchNews(update tgbotapi.Update) {
+	error := godotenv.Load()
+	if error != nil {
+		log.Fatal("Error loading .env file")
+	}
+
+	bot, error := tgbotapi.NewBotAPI(os.Getenv("TOKEN"))
+
+	if error != nil {
+		log.Panic(error)
+	}
+	var news struct {
+		Title string `json:"title"`
+		URL   string `json:"url"`
+	}
 
 	response, err := GetLatestNewsID()
 	if err != nil {
 		fmt.Println(err)
 	}
-	//for each id in the response, fetch the news from https://hacker-news.firebaseio.com/v0/item/29851159.json?print=pretty
 	for _, id := range response {
-		//		fmt.Println(id)
 		resp, err := http.Get(fmt.Sprintf(newsInfos, id))
 		if err != nil {
 			fmt.Println(err)
@@ -46,21 +65,19 @@ func FetchNews() {
 		if resp.StatusCode != http.StatusOK {
 			fmt.Println(fmt.Sprintf("request failed with status %s", resp.Status))
 		}
-		//print the response in json format
-		var news struct {
-			Title string `json:"title"`
-			URL   string `json:"url"`
-		}
 		err = json.NewDecoder(resp.Body).Decode(&news)
 		if err != nil {
 			fmt.Println(err)
 		}
-		//this prints all the news
-		// to do: print only the news that are relevant to the user
-		fmt.Println(news.Title)
-		fmt.Println(news.URL)
-
+		for _, topic := range relevantTopics {
+			if news.Title != "" && news.URL != "" {
+				if strings.Contains(strings.ToLower(news.Title), topic) {
+					//News = append(News, news.Title, news.URL)
+					msg := tgbotapi.NewMessage(update.Message.Chat.ID, news.Title+"\n"+news.URL)
+					bot.Send(msg)
+				}
+			}
+		}
 	}
 
-	fmt.Println(response[0])
 }
