@@ -12,11 +12,15 @@ import (
 	"github.com/joho/godotenv"
 )
 
+var relevantTopics = []string{"privacy", "hack", "linux", "golang", "hacker", "malware", "exploit", "leak", "CIA", "NSA", "hacked", "breaches", "breached", "security", "OSINT", "leaked"}
 var newStoriesIDs = "https://hacker-news.firebaseio.com/v0/newstories.json?print=pretty"
 var newsInfos = "https://hacker-news.firebaseio.com/v0/item/%d.json?print=pretty"
-var News []string
 var ids []int
-var relevantTopics = []string{"privacy", "hack", "linux", "golang", "hacker", "malware", "exploit", "leak", "CIA", "NSA", "hacked", "breaches", "breached", "security", "OSINT", "leaked"}
+
+type News struct {
+	Title string `json:"title"`
+	URL   string `json:"url"`
+}
 
 //GetLatestNewsID returns the latest news id
 func GetLatestNewsID() ([]int, error) {
@@ -26,7 +30,7 @@ func GetLatestNewsID() ([]int, error) {
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
-		return ids, fmt.Errorf("request failed with status %s", resp.Status)
+		return ids, fmt.Errorf("Error %s", resp.Status)
 	}
 	err = json.NewDecoder(resp.Body).Decode(&ids)
 	if err != nil {
@@ -47,15 +51,14 @@ func FetchNews(update tgbotapi.Update) {
 	if error != nil {
 		log.Panic(error)
 	}
-	var news struct {
-		Title string `json:"title"`
-		URL   string `json:"url"`
-	}
 
 	response, err := GetLatestNewsID()
 	if err != nil {
 		fmt.Println(err)
 	}
+
+	news := News{}
+
 	for _, id := range response {
 		resp, err := http.Get(fmt.Sprintf(newsInfos, id))
 		if err != nil {
@@ -63,7 +66,7 @@ func FetchNews(update tgbotapi.Update) {
 		}
 		defer resp.Body.Close()
 		if resp.StatusCode != http.StatusOK {
-			fmt.Println(fmt.Sprintf("request failed with status %s", resp.Status))
+			fmt.Println(fmt.Sprintf("Error %s", resp.Status))
 		}
 		err = json.NewDecoder(resp.Body).Decode(&news)
 		if err != nil {
@@ -72,12 +75,13 @@ func FetchNews(update tgbotapi.Update) {
 		for _, topic := range relevantTopics {
 			if news.Title != "" && news.URL != "" {
 				if strings.Contains(strings.ToLower(news.Title), topic) {
-					//News = append(News, news.Title, news.URL)
+
+					//to do: save the news in json file
+
 					msg := tgbotapi.NewMessage(update.Message.Chat.ID, news.Title+"\n"+news.URL)
 					bot.Send(msg)
 				}
 			}
 		}
 	}
-
 }
