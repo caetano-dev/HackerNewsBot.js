@@ -47,19 +47,25 @@ const fetchNewsInfo = async () => {
             fs.writeFileSync('./news.json', JSON.stringify(relevantNews))
         }
 
-        //send to the user only the news that are not already in the file
-        newsToSend = []
+        //check if the news is already in the file, if it is, don't add it, if it is not, save the news and send it to the user
+
         let news = JSON.parse(fs.readFileSync('./news.json'))
+        let newsToSend = []
+        
         for (let i = 0; i < relevantNews.length; i++) {
-            if (news.title != relevantNews.title) {
-                console.log(news)
-                console.log(relevantNews)
+            let found = false
+            for (let j = 0; j < news.length; j++) {
+                if (relevantNews[i].id === news[j].id) {
+                    found = true
+                }
+            }
+            if (!found) {
                 newsToSend.push(relevantNews[i])
             }
         }
         fs.writeFileSync('./news.json', JSON.stringify(relevantNews))
         return newsToSend
-
+            
     } catch (error) {
         console.log(error);
         return "Sorry, got an error";
