@@ -43,27 +43,30 @@ const fetchNewsInfo = async () => {
             }
         }
 
-        //check if the news is already in news.json
-
-        let newsInJsonFile = JSON.parse(fs.readFileSync('./news.json', 'utf8'));
-
-        for (let i = 0; i < relevantNews.length; i++) {
-            for (let j = 0; j < newsInJsonFile.length; j++) {
-                if (relevantNews[i].title !== newsInJsonFile[j].title) {
-                    //write the news to news.json
-                    fs.WriteFileSync('./news.json', JSON.stringify(relevantNews), (err) => console.error(err));
-                    console.log('The file has been saved!');
-                };
+        //create a file with the news if it doesn't exist
+        if (!fs.existsSync('./news.json')) {
+            fs.writeFileSync('./news.json', JSON.stringify(relevantNews))
+        }
+        //read the file and append the new news
+        else {
+            let data = fs.readFileSync('./news.json')
+            let json = JSON.parse(data)
+            json.push(relevantNews)
+            fs.writeFileSync('./news.json', JSON.stringify(json))
+        }
+        //check if the news is already in the file before adding it
+        let data = fs.readFileSync('./news.json')
+        let json = JSON.parse(data)
+        for (let i = 0; i < json.length; i++) {
+            for (let j = 0; j < relevantNews.length; j++) {
+                if (json[i].title === relevantNews[j].title) {
+                    relevantNews.splice(j, 1)
+                }
             }
         }
-
-        //        fs.writeFileSync('./news.json', JSON.stringify(newsToSend, null, 2));
-//        console.log(relevantNews)
-        console.log(newsToSend)
-        console.log(newsInJsonFile)
-
-        //        return relevantNews
-        return newsToSend
+        //write the news to the file
+        fs.writeFileSync('./news.json', JSON.stringify(relevantNews))
+        return relevantNews
 
         } catch (error) {
         console.log(error);
