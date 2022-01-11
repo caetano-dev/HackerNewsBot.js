@@ -6,7 +6,7 @@ let idsArray = []
 let relevantNews = []
 
 
-const relevantTopics = ["privacy", "hack", "linux", "golang", "hacker", "the", "malware", "exploit",
+const relevantTopics = ["privacy","a", "hack", "linux", "golang", "hacker", "the", "malware", "exploit",
 "leak", "CIA", "NSA", "hacked", "breaches", "breached", "security", "OSINT", "leaked", "GNUl", "free and open source","open source"]
 const newStoriesIDs = "https://hacker-news.firebaseio.com/v0/newstories.json?print=pretty"
 const newsInfos = "https://hacker-news.firebaseio.com/v0/item/"+newsID+".json?print=pretty"
@@ -30,7 +30,7 @@ const fetchNewsInfo = async () => {
 
         await getLatestNewsIds();
         //         for (let i = 0; i < idsArray.length; i++) {
-        for (let i = 0; i < 10; i++) {
+        for (let i = 0; i < 20; i++) {
             newsID = idsArray[i]
             const response = await axios.get(
                 "https://hacker-news.firebaseio.com/v0/item/"+newsID+".json?print=pretty"
@@ -41,36 +41,46 @@ const fetchNewsInfo = async () => {
                 }
             }
         }
-
-        //create a file with the news if it doesn't exist
         if (!fs.existsSync('./news.json')) {
             fs.writeFileSync('./news.json', JSON.stringify(relevantNews))
         }
 
-        //check if the news is already in the file, if it is, don't add it, if it is not, save the news and send it to the user
+        let newsToSend = checkIfNewsExists(relevantNews)
+        relevantNews = []
+        console.log("news to send: " + newsToSend.length)
+        console.log(newsToSend)
 
-        let news = JSON.parse(fs.readFileSync('./news.json'))
-        let newsToSend = []
-        
-        for (let i = 0; i < relevantNews.length; i++) {
-            let found = false
-            for (let j = 0; j < news.length; j++) {
-                if (relevantNews[i].id === news[j].id) {
-                    found = true
-                }
-            }
-            if (!found) {
-                newsToSend.push(relevantNews[i])
-            }
-        }
-        fs.writeFileSync('./news.json', JSON.stringify(relevantNews))
+        //add news to the file
         return newsToSend
-            
+
     } catch (error) {
         console.log(error);
         return "Sorry, got an error";
     }
 };
+
+function checkIfNewsExists(news) {
+    console.log("checking if news exists")
+    console.log(news)
+    let newsToSend = []
+    let newsToCheck = JSON.parse(fs.readFileSync('./news.json'))
+    for (let i = 0; i < news.length; i++) {
+        let found = false
+        for (let j = 0; j < newsToCheck.length; j++) {
+            if (news[i].title.includes(newsToCheck[j].title)) {
+                found = true
+                console.log("found------ " + news[i].title)
+            }
+        }
+        if (!found) {
+            newsToSend.push(news[i])
+            console.log("not found------ " + news[i].title)
+            fs.appendFileSync('./news.json', JSON.stringify(news[i]))
+            console.log("added news" + news[i].title)
+        }
+    }
+    return newsToSend
+}
 
 module.exports = {
     fetchNewsInfo,
