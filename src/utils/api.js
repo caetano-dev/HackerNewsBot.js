@@ -3,18 +3,15 @@ const axios = require("axios").default;
 
 let newsID
 let idsArray = []
-let relevantNews = []
 
-
-const relevantTopics = ["privacy","a", "hack", "linux", "golang", "hacker", "the", "malware", "exploit",
+const relevantTopics = ["privacy", "a", "the", "hack", "linux", "golang", "hacker", "malware", "exploit",
 "leak", "CIA", "NSA", "hacked", "breaches", "breached", "security", "OSINT", "leaked", "GNUl", "free and open source","open source"]
-const newStoriesIDs = "https://hacker-news.firebaseio.com/v0/newstories.json?print=pretty"
-const newsInfos = "https://hacker-news.firebaseio.com/v0/item/"+newsID+".json?print=pretty"
+const newsIDsLink = "https://hacker-news.firebaseio.com/v0/newstories.json?print=pretty"
 
 const getLatestNewsIds = async () =>{
     try {
         const response = await axios.get(
-            newStoriesIDs
+            newsIDsLink
         );
         for (let i = 0; i < response.data.length; i++) {
             idsArray.push(response.data[i])
@@ -25,65 +22,47 @@ const getLatestNewsIds = async () =>{
     }
 };
 
-const fetchNewsInfo = async () => {
+const fetchNewsTitleAndURL = async () => {
     try {
-
-        await getLatestNewsIds();
-        //         for (let i = 0; i < idsArray.length; i++) {
-        for (let i = 0; i < 20; i++) {
-            newsID = idsArray[i]
+        console.log("Fetching news...")
+        const newsID = await getLatestNewsIds()
+        let news = []
+        //        for (let i = 0; i < newsID.length; i++) {
+        for (let i = 0; i < 5; i++) {
+            const newsLink = "https://hacker-news.firebaseio.com/v0/item/" + newsID[i] + ".json?print=pretty"
             const response = await axios.get(
-                "https://hacker-news.firebaseio.com/v0/item/"+newsID+".json?print=pretty"
+                newsLink
             );
-            for (let j = 0; j < relevantTopics.length; j++) {
-                if (response.data.title.toLowerCase().includes(relevantTopics[j])) {
-                    relevantNews.push(response.data)
-                }
-            }
+            news.push(response.data)
         }
-        if (!fs.existsSync('./news.json')) {
-            fs.writeFileSync('./news.json', JSON.stringify(relevantNews))
-        }
+        let relevantNews = checkIfNewsIsRelevant(news)
+        console.log(relevantNews)
 
-        let newsToSend = checkIfNewsExists(relevantNews)
-        relevantNews = []
-        console.log("news to send: " + newsToSend.length)
-        console.log(newsToSend)
-
-        //add news to the file
-        return newsToSend
-
+        return relevantNews
     } catch (error) {
-        console.log(error);
-        return "Sorry, got an error";
+        return error;
     }
 };
 
-function checkIfNewsExists(news) {
-    console.log("checking if news exists")
-    console.log(news)
-    let newsToSend = []
-    let newsToCheck = JSON.parse(fs.readFileSync('./news.json'))
+function checkIfNewsIsRelevant(news) {
+    console.log("Checking if news is relevant...")
+    let relevantNews = []
     for (let i = 0; i < news.length; i++) {
-        let found = false
-        for (let j = 0; j < newsToCheck.length; j++) {
-            if (news[i].title.includes(newsToCheck[j].title)) {
-                found = true
-                console.log("found------ " + news[i].title)
+        let relevant = false
+        for (let j = 0; j < relevantTopics.length; j++) {
+            if (news[i].title.toLowerCase().includes(relevantTopics[j])) {
+                relevant = true
             }
         }
-        if (!found) {
-            newsToSend.push(news[i])
-            console.log("not found------ " + news[i].title)
-            fs.appendFileSync('./news.json', JSON.stringify(news[i]))
-            console.log("added news" + news[i].title)
+        if (relevant) {
+            relevantNews.push(news[i])
         }
     }
-    return newsToSend
+    return relevantNews
 }
 
 module.exports = {
-    fetchNewsInfo,
+    fetchNewsTitleAndURL,
     getLatestNewsIds
 };
 
