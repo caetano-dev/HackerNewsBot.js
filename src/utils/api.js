@@ -4,7 +4,6 @@ const axios = require("axios").default;
 let newsID
 let idsArray = []
 let relevantNews = []
-let newsToSend = []
 
 
 const relevantTopics = ["privacy", "hack", "linux", "golang", "hacker", "the", "malware", "exploit",
@@ -47,28 +46,21 @@ const fetchNewsInfo = async () => {
         if (!fs.existsSync('./news.json')) {
             fs.writeFileSync('./news.json', JSON.stringify(relevantNews))
         }
-        //read the file and append the new news
-        else {
-            let data = fs.readFileSync('./news.json')
-            let json = JSON.parse(data)
-            json.push(relevantNews)
-            fs.writeFileSync('./news.json', JSON.stringify(json))
-        }
-        //check if the news is already in the file before adding it
-        let data = fs.readFileSync('./news.json')
-        let json = JSON.parse(data)
-        for (let i = 0; i < json.length; i++) {
-            for (let j = 0; j < relevantNews.length; j++) {
-                if (json[i].title === relevantNews[j].title) {
-                    relevantNews.splice(j, 1)
-                }
+
+        //send to the user only the news that are not already in the file
+        newsToSend = []
+        let news = JSON.parse(fs.readFileSync('./news.json'))
+        for (let i = 0; i < relevantNews.length; i++) {
+            if (news.title != relevantNews.title) {
+                console.log(news)
+                console.log(relevantNews)
+                newsToSend.push(relevantNews[i])
             }
         }
-        //write the news to the file
         fs.writeFileSync('./news.json', JSON.stringify(relevantNews))
-        return relevantNews
+        return newsToSend
 
-        } catch (error) {
+    } catch (error) {
         console.log(error);
         return "Sorry, got an error";
     }
