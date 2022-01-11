@@ -4,10 +4,8 @@ const axios = require("axios").default;
 let newsID
 let idsArray = []
 let relevantNews = []
+let newsToSend = []
 
-var news = {
-    news: []
-};
 
 const relevantTopics = ["privacy", "hack", "linux", "golang", "hacker", "the", "malware", "exploit",
 "leak", "CIA", "NSA", "hacked", "breaches", "breached", "security", "OSINT", "leaked", "GNUl", "free and open source","open source"]
@@ -33,7 +31,7 @@ const fetchNewsInfo = async () => {
 
         await getLatestNewsIds();
         //         for (let i = 0; i < idsArray.length; i++) {
-        for (let i = 0; i < 15; i++) {
+        for (let i = 0; i < 10; i++) {
             newsID = idsArray[i]
             const response = await axios.get(
                 "https://hacker-news.firebaseio.com/v0/item/"+newsID+".json?print=pretty"
@@ -45,24 +43,29 @@ const fetchNewsInfo = async () => {
             }
         }
 
-        fs.writeFileSync("./news.json", JSON.stringify(relevantNews));
+        //check if the news is already in news.json
 
-        fs.readFile('news.json', 'utf8', function readFileCallback(err, data){
-            if (err){
-                console.log(err);
-            } else {
-                console.log(data);
-                news = JSON.parse(data); 
-                news.push(data); 
-                json = JSON.stringify(relevantNews); 
-                fs.writeFile('news.json', json, 'utf8', (err)=>{
-                    if (err) throw err;
+        let newsInJsonFile = JSON.parse(fs.readFileSync('./news.json', 'utf8'));
+
+        for (let i = 0; i < relevantNews.length; i++) {
+            for (let j = 0; j < newsInJsonFile.length; j++) {
+                if (relevantNews[i].title !== newsInJsonFile[j].title) {
+                    //write the news to news.json
+                    fs.WriteFileSync('./news.json', JSON.stringify(relevantNews), (err) => console.error(err));
                     console.log('The file has been saved!');
-                }); 
-            }}); 
+                };
+            }
+        }
 
-        return relevantNews
-    } catch (error) {
+        //        fs.writeFileSync('./news.json', JSON.stringify(newsToSend, null, 2));
+//        console.log(relevantNews)
+        console.log(newsToSend)
+        console.log(newsInJsonFile)
+
+        //        return relevantNews
+        return newsToSend
+
+        } catch (error) {
         console.log(error);
         return "Sorry, got an error";
     }
