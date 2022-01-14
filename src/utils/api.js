@@ -1,15 +1,10 @@
 const fs = require('fs');
 const axios = require("axios").default;
-
-let newsID
-
-const relevantTopics = ["privacy", "a", "the", "hack", "linux", "golang", "hacker", "malware", "exploit",
+const relevantTopics = ["privacy", "hack", "linux", "golang", "hacker", "malware", "exploit",
 "leak", "CIA", "NSA", "hacked", "breaches", "breached", "security", "OSINT", "leaked", "GNUl", "free and open source","open source"]
 const newsIDsLink = "https://hacker-news.firebaseio.com/v0/newstories.json?print=pretty"
 
-//get the latest news id
 const getLatestNewsIds = async () =>{
-
     let idsArray = []
     try {
         const response = await axios.get(
@@ -24,9 +19,7 @@ const getLatestNewsIds = async () =>{
     }
 };
 
-//check if the news is relevant
 const checkIfNewsIsRelevant = async (news) => {
-    console.log("Checking if news is relevant...")
     let relevantNews = []
     for (let i = 0; i < news.length; i++) {
         let relevant = false
@@ -42,14 +35,11 @@ const checkIfNewsIsRelevant = async (news) => {
     return relevantNews
 }
 
-//get the relevant news
 const fetchRelevantNews = async () => {
     try {
-        console.log("Fetching news...")
         const newsID = await getLatestNewsIds()
         let news = []
-        //        for (let i = 0; i < newsID.length; i++) {
-        for (let i = 0; i < 5; i++) {
+        for (let i = 0; i < newsID.length; i++) {
             const newsLink = "https://hacker-news.firebaseio.com/v0/item/" + newsID[i] + ".json?print=pretty"
             const response = await axios.get(
                 newsLink
@@ -57,7 +47,6 @@ const fetchRelevantNews = async () => {
             news.push(response.data)
         }
         let relevantNews = await checkIfNewsIsRelevant(news)
-        //console.log(relevantNews)
 
         return relevantNews
     } catch (error) {
@@ -65,27 +54,28 @@ const fetchRelevantNews = async () => {
     }
 };
 
-
-//check if the relevant news are already in the json file
 const checkIfNewsIsInJson = async () => {
     let relevantNews = await fetchRelevantNews()
     let newsToBeAdded = []
-    console.log("Checking if news is in json...")
     let newsInJson = fs.readFileSync('./news.json', 'utf8')
-    console.log("news is json are " + newsInJson)
 
     for (let i = 0; i < relevantNews.length; i++) {
-        //open the news.json file and check if the news is already in the file
-        //if not, add it to the newsToBeAdded array
-        //if yes, do nothing
-
         if (newsInJson.includes(relevantNews[i].title)) {
-            console.log(relevantNews[i].title + " is already in the json file")
         } else {
             newsToBeAdded.push(relevantNews[i])
         }
+        await addNewsToJson(newsToBeAdded)
     }
     return newsToBeAdded
+}
+
+const addNewsToJson = async (newsToBeAdded) => {
+    let newsInJson = fs.readFileSync('./news.json', 'utf8')
+    let news = JSON.parse(newsInJson)
+    for (let i = 0; i < newsToBeAdded.length; i++) {
+        news.push(newsToBeAdded[i])
+    }
+    fs.writeFileSync('./news.json', JSON.stringify(news))
 }
 
 

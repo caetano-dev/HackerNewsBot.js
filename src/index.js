@@ -9,7 +9,6 @@ const { checkIfNewsIsInJson } = require("./utils/api");
 
 bot.onText(/\/start/, async (msg) => {
     const chatId = msg.chat.id;
-//    const latestNews = await fetchRelevantNews();
     const latestNews = await checkIfNewsIsInJson();
     for (let i = 0; i < latestNews.length; i++) {
         const news = latestNews[i];
