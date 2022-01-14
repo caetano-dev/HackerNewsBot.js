@@ -2,13 +2,12 @@ const fs = require('fs');
 const axios = require("axios").default;
 const relevantTopics = ["privacy", "hack", "linux", "golang", "hacker", "malware", "exploit",
 "leak", "CIA", "NSA", "hacked", "breaches", "breached", "security", "OSINT", "leaked", "GNUl", "free and open source","open source"]
-const newsIDsLink = "https://hacker-news.firebaseio.com/v0/newstories.json?print=pretty"
 
 const getLatestNewsIds = async () =>{
     let idsArray = []
     try {
         const response = await axios.get(
-            newsIDsLink
+            "https://hacker-news.firebaseio.com/v0/newstories.json?print=pretty"
         );
         for (let i = 0; i < response.data.length; i++) {
             idsArray.push(response.data[i])
