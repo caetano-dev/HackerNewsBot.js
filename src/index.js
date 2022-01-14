@@ -17,4 +17,3 @@ bot.onText(/\/start/, async (msg) => {
         bot.sendMessage(chatId, newsText);
     }
 });
-
