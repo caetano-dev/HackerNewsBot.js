@@ -1,7 +1,7 @@
 const fs = require('fs');
 const axios = require("axios").default;
 const relevantTopics = ["privacy", "hack", "linux", "golang", "hacker", "malware", "exploit",
-"leak", "CIA", "NSA", "hacked", "breaches", "breached", "security", "OSINT", "leaked", "GNUl", "free and open source","open source"]
+"leak", "CIA", "NSA", "hacked", "breaches", "breached", "security", "OSINT", "leaked", "GNU", "free and open source", "open source"]
 
 const getLatestNewsIds = async () =>{
     let idsArray = []
