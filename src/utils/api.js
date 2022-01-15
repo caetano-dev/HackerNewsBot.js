@@ -54,20 +54,17 @@ const fetchRelevantNews = async () => {
 };
 
 const checkIfNewsIsInJson = async () => {
-    while (true) {
-        let relevantNews = await fetchRelevantNews()
-        let newsToBeAdded = []
-        let newsInJson = fs.readFileSync('./news.json', 'utf8')
-
-        for (let i = 0; i < relevantNews.length; i++) {
-            if (newsInJson.includes(relevantNews[i].title)) {
-            } else {
-                newsToBeAdded.push(relevantNews[i])
-            }
-            await addNewsToJson(newsToBeAdded)
+    let relevantNews = await fetchRelevantNews()
+    let newsToBeAdded = []
+    let newsInJson = fs.readFileSync('./news.json', 'utf8')
+    for (let i = 0; i < relevantNews.length; i++) {
+        if (newsInJson.includes(relevantNews[i].title)) {
+        } else {
+            newsToBeAdded.push(relevantNews[i])
         }
-        return newsToBeAdded
+        await addNewsToJson(newsToBeAdded)
     }
+    return newsToBeAdded
 }
 
 const addNewsToJson = async (newsToBeAdded) => {
@@ -77,14 +74,11 @@ const addNewsToJson = async (newsToBeAdded) => {
         news.push(newsToBeAdded[i])
     }
     fs.writeFileSync('./news.json', JSON.stringify(news))
-    
-    
+
+
 }
 
-
 module.exports = {
-    fetchRelevantNews,
     checkIfNewsIsInJson,
-    getLatestNewsIds
 };
 
