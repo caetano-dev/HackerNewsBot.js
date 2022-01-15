@@ -18,5 +18,5 @@ $ npm install
 ```
 run the application:
 ```
-$ node run index.js
+$ node index.js
 ```
