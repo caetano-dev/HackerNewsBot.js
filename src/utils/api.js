@@ -23,7 +23,7 @@ const checkIfNewsIsRelevant = async (news) => {
     for (let i = 0; i < news.length; i++) {
         let relevant = false
         for (let j = 0; j < relevantTopics.length; j++) {
-            if (news[i].title.toLowerCase().includes(relevantTopics[j])) {
+            if (news[i].title.toLowerCase().includes(relevantTopics[j]) && !news[i].title.includes("Ask HN:")) {
                 relevant = true
             }
         }
@@ -74,8 +74,6 @@ const addNewsToJson = async (newsToBeAdded) => {
         news.push(newsToBeAdded[i])
     }
     fs.writeFileSync('./news.json', JSON.stringify(news))
-
-
 }
 
 module.exports = {
