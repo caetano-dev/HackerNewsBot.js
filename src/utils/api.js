@@ -36,9 +36,8 @@ const fetchRelevantNews = async () => {
         const newsID = await getLatestNewsIds()
         let news = []
         for (let i = 0; i < newsID.length; i++) {
-            const newsLink = "https://hacker-news.firebaseio.com/v0/item/" + newsID[i] + ".json?print=pretty"
             const response = await axios.get(
-                newsLink
+                "https://hacker-news.firebaseio.com/v0/item/" + newsID[i] + ".json?print=pretty"
             );
             news.push(response.data)
         }
@@ -53,6 +52,7 @@ const checkIfNewsIsInJson = async () => {
     let relevantNews = await fetchRelevantNews()
     let newsToBeAdded = []
     let newsInJson = fs.readFileSync('./news.json', 'utf8')
+    await cleanFile(JSON.parse(newsInJson))
 
     for (let i = 0; i < relevantNews.length; i++) {
         if (!newsInJson.includes(relevantNews[i].title)) {
@@ -70,6 +70,12 @@ const addNewsToJson = async (newsToBeAdded) => {
         news.push(newsToAdd)
     });
     fs.writeFileSync('./news.json', JSON.stringify(news))
+}
+
+const cleanFile = async (news) => {
+    const numberOfNewsToDelete = news.length - 500;
+    news.splice(0, numberOfNewsToDelete);
+    fs.writeFileSync('news.json', JSON.stringify(news));
 }
 
 module.exports = {
