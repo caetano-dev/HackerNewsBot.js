@@ -73,7 +73,7 @@ const addNewsToJson = async (newsToBeAdded) => {
 }
 
 const cleanFile = async (news) => {
-    const numberOfNewsToDelete = news.length - 500;
+    const numberOfNewsToDelete = news.length - 400;
     news.splice(0, numberOfNewsToDelete);
     fs.writeFileSync('news.json', JSON.stringify(news));
 }
