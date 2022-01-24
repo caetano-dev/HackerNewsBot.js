@@ -1,6 +1,6 @@
 const fs = require('fs');
 const axios = require("axios").default;
-const relevantTopics = ["privacy", "rust", "hack", "linux", "golang", "hacker", "malware", "exploit", "leak", "CIA", "NSA", "hacked", "breaches", "breached", "security", "OSINT", "leaked", "GNU", "free and open source", "open source"]
+const relevantTopics = ["privacy", "hack", "linux", "golang", "hacker", "malware", "exploit", "leak", "CIA", "NSA", "hacked", "breaches", "breached", "security", "OSINT", "leaked", "GNU", "free and open source", "open source"]
 
 const getLatestNewsIds = async () =>{
     try{
@@ -73,11 +73,12 @@ const addNewsToJson = async (newsToBeAdded) => {
 }
 
 const cleanFile = async (news) => {
-    const numberOfNewsToDelete = news.length - 400;
-    news.splice(0, numberOfNewsToDelete);
-    fs.writeFileSync('news.json', JSON.stringify(news));
+    if (news.lenght > 500){
+        const numberOfNewsToDelete = news.length - 500;
+        news.splice(0, numberOfNewsToDelete);
+        fs.writeFileSync('news.json', JSON.stringify(news));
+    }
 }
-
 module.exports = {
     checkIfNewsIsInJson,
 };
