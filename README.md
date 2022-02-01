@@ -1,5 +1,8 @@
 # HackerNews Telegram bot
 
+### Attention!
+This repository is no longer being mainteined. If you want the same bot, but with more features and higher speed, check https://github.com/drull1000/HackerNewsBot-Golang
+
 A Telegram bot that serves you with personalized HackerNews articles. You can self host it and make it filter only the news that are relevant to you.
 
 ## How to set up
